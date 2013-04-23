@@ -32,8 +32,8 @@ import org.codehaus.groovy.grails.support.encoding.StreamingEncoder;
  * @author Lari Hotari
  * @since 2.3
  */
-public class RawCodec implements Encoder, Decoder, StreamingEncoder {
-    static final CodecIdentifier RAW_CODEC_IDENTIFIER = new DefaultCodecIdentifier("Raw");
+public class SafeCodec implements Encoder, Decoder, StreamingEncoder {
+    static final CodecIdentifier SAFE_CODEC_IDENTIFIER = new DefaultCodecIdentifier("Safe", "Raw");
 
     /*
      * (non-Javadoc)
@@ -92,6 +92,6 @@ public class RawCodec implements Encoder, Decoder, StreamingEncoder {
      * getCodecIdentifier()
      */
     public CodecIdentifier getCodecIdentifier() {
-        return RAW_CODEC_IDENTIFIER;
+        return SAFE_CODEC_IDENTIFIER;
     }
 }

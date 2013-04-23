@@ -21,7 +21,7 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsCodecClass
 import org.codehaus.groovy.grails.plugins.codecs.HTML4Codec
 import org.codehaus.groovy.grails.plugins.codecs.HTMLCodec
-import org.codehaus.groovy.grails.plugins.codecs.RawCodec
+import org.codehaus.groovy.grails.plugins.codecs.SafeCodec
 import org.codehaus.groovy.grails.support.encoding.EncoderAware;
 
 import spock.lang.Specification
@@ -38,9 +38,9 @@ class StreamCharBufferSpec extends Specification {
         grailsApplication.getArtefact("Codec", HTMLCodec.name) >> { htmlCodecClass }
         GrailsCodecClass html4CodecClass = new DefaultGrailsCodecClass(HTML4Codec)
         grailsApplication.getArtefact("Codec", HTML4Codec.name) >> { html4CodecClass }
-        GrailsCodecClass rawCodecClass = new DefaultGrailsCodecClass(RawCodec)
-        grailsApplication.getArtefact("Codec", RawCodec.name) >> { rawCodecClass }
-        def codecClasses = [htmlCodecClass, html4CodecClass, rawCodecClass]
+        GrailsCodecClass safeCodecClass = new DefaultGrailsCodecClass(SafeCodec)
+        grailsApplication.getArtefact("Codec", SafeCodec.name) >> { safeCodecClass }
+        def codecClasses = [htmlCodecClass, html4CodecClass, safeCodecClass]
         grailsApplication.getCodecClasses() >> { codecClasses }
         GrailsWebUtil.bindMockWebRequest()
         
@@ -145,7 +145,7 @@ class StreamCharBufferSpec extends Specification {
         writer << hello
         writer.flush()
         def buffer3=new StreamCharBuffer()
-        def helloEncoded = buffer2.encodeAsRaw().encodeAsHTML()
+        def helloEncoded = buffer2.encodeAsSafe().encodeAsHTML()
         def writer2 = new GrailsPrintWriter(buffer3.writerForEncoder)
         writer2 << helloEncoded
         writer2 << "<script>"
@@ -176,10 +176,10 @@ class StreamCharBufferSpec extends Specification {
         buffer.toString().encodeAsHTML().encodeAsHTML().toString() == "&lt;script&gt;Hello world &amp; hi"
     }
     
-    def "encodeAsRaw should prevent other encodings"() {
+    def "encodeAsSafe should prevent other encodings"() {
         when:
         out << "<script>"
-        out << "Hello world & hi".encodeAsRaw()
+        out << "Hello world & hi".encodeAsSafe()
         then:
         buffer.encodeAsHTML().toString() == "&lt;script&gt;Hello world & hi"
     }
@@ -187,7 +187,7 @@ class StreamCharBufferSpec extends Specification {
     def "toString should keep encoding state when no codec"() {
         when:
         out << "<script>"
-        out << "Hello world & hi".encodeAsRaw()
+        out << "Hello world & hi".encodeAsSafe()
         then:
         buffer.encodeAsHTML().toString() == "&lt;script&gt;Hello world & hi"
         buffer.encodeAsHTML().encodeAsHTML().toString() == "&lt;script&gt;Hello world & hi"
@@ -199,7 +199,7 @@ class StreamCharBufferSpec extends Specification {
         
     def "serialization should keep encoding state"() {
         when:
-        codecOut << "Hello world & hi".encodeAsRaw()
+        codecOut << "Hello world & hi".encodeAsSafe()
         codecOut << "<script>"
         then:
         buffer.toString() == "Hello world & hi&lt;script&gt;"
@@ -218,7 +218,7 @@ class StreamCharBufferSpec extends Specification {
     
     def "clone should keep encoding state"() {
         when:
-        codecOut << "Hello world & hi".encodeAsRaw()
+        codecOut << "Hello world & hi".encodeAsSafe()
         codecOut << "<script>"
         then:
         buffer.toString() == "Hello world & hi&lt;script&gt;"

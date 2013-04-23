@@ -327,7 +327,7 @@ class ValidationTagLib {
             }
         }
         if (text) {
-            return attrs.encodeAs ? text."encodeAs${attrs.encodeAs}"() : text.encodeAsRaw()
+            return !(attrs.encodeAs) ? text.encodeAsSafe() : text
         }
         ''
     }
